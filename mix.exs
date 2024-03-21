@@ -1,9 +1,9 @@
-defmodule Spex.MixProject do
+defmodule Specx.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :spex,
+      app: :specx,
       version: "0.1.0",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
@@ -14,7 +14,7 @@ defmodule Spex.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {Spex.Application, []},
+      mod: {Specx.Application, []},
       extra_applications: [:logger]
     ]
   end

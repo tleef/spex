@@ -1,8 +1,8 @@
-defmodule SpexTest do
+defmodule SpecxTest do
   use ExUnit.Case
-  doctest Spex
+  doctest Specx
 
   test "greets the world" do
-    assert Spex.hello() == :world
+    assert Specx.hello() == :world
   end
 end

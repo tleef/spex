@@ -1,9 +1,9 @@
-defmodule Spex.Application do
+defmodule Specx.Application do
   use Application
 
   def start(_type, _args) do
     Supervisor.start_link(
-      [Spex.Registry],
+      [Specx.Registry],
       strategy: :one_for_one,
       name: __MODULE__
     )
