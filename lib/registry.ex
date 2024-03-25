@@ -1,32 +1,36 @@
 defmodule Specx.Registry do
-  use Agent
+  use GenServer
 
-  def start_link(args) do
-    initial_state = Keyword.get(args, :initial_state, %{})
-    name = Keyword.get(args, :name, __MODULE__)
-    Agent.start_link(fn -> initial_state end, name: name)
+  @table __MODULE__
+
+  def start_link(opts) do
+    name = Keyword.get(opts, :name, __MODULE__)
+    GenServer.start_link(__MODULE__, opts, name: name)
+  end
+
+  def init(opts) do
+    :ets.new(@table, [:named_table, :public, :set])
+
+    Keyword.get(opts, :initial_specs, [])
+    |> register_batch()
+
+    {:ok, nil}
+  end
+
+  def register(k, nil) when is_atom(k) do
+    :ets.delete(@table, k)
   end
 
   def register(k, spec) when is_atom(k) do
-    to_key(k)
-    |> register(spec)
-  end
-
-  def register({ns, name} = k, nil) when is_binary(ns) and is_binary(name) do
-    Agent.update(__MODULE__, &Map.delete(&1, k))
-  end
-
-  def register({ns, name} = k, spec) when is_binary(ns) and is_binary(name) do
-    Agent.update(__MODULE__, &Map.put(&1, k, spec))
+    :ets.insert(@table, {k, spec})
   end
 
   def resolve(k) when is_atom(k) do
-    to_key(k)
-    |> resolve()
-  end
-
-  def resolve({ns, name} = k) when is_binary(ns) and is_binary(name) do
-    Agent.get(__MODULE__, &Map.get(&1, k))
+    :ets.lookup(@table, k)
+    |> case do
+      [{^k, spec}] -> spec
+      [] -> nil
+    end
   end
 
   def resolve(k) do
@@ -41,13 +45,11 @@ defmodule Specx.Registry do
     end
   end
 
-  defp to_key(k) when is_atom(k) do
-    Atom.to_string(k)
-    |> String.split("/")
-    |> List.to_tuple()
-    |> resolve_ns()
+  defp register_batch([]) do
+    false
   end
 
-  defp resolve_ns({name}), do: {"global", name}
-  defp resolve_ns({ns, name}), do: {ns, name} 
+  defp register_batch(spec_defs) do
+    :ets.insert(@table, spec_defs)
+  end
 end

@@ -1,26 +1,20 @@
 defmodule Specx do
-  alias Specx.Spec
-
   defmacro __using__(_) do
     quote do
-      import Specx, only: [
-        spec: 2,
-        map: 0,
-        map: 1,
-        map: 2,
-        list: 0,
-        list: 1,
-        list: 2,
-        tuple: 0,
-        tuple: 1,
-        tuple: 2
-      ]
-    end
-  end
+      use Specx.SpecProvider
 
-  defmacro spec(name, spec) do
-    quote do
-      Specx.register(unquote(name), unquote(spec))
+      import Specx,
+        only: [
+          map: 0,
+          map: 1,
+          map: 2,
+          list: 0,
+          list: 1,
+          list: 2,
+          tuple: 0,
+          tuple: 1,
+          tuple: 2
+        ]
     end
   end
 
@@ -28,7 +22,7 @@ defmodule Specx do
   Given an atom k, and a spec object, makes an entry in the registry
   mapping k to the spec. Use nil to remove an entry in the registry for k.
   """
-  def register(k, spec) when is_atom(k) do 
+  def register(k, spec) when is_atom(k) do
     Specx.Registry.register(k, spec)
   end
 
@@ -38,7 +32,7 @@ defmodule Specx do
   else (possibly destructured value.
   """
   def conform(spec, x) do
-    Spec.conform(spec, x)
+    Specx.Spec.conform(spec, x)
   end
 
   @doc """
@@ -51,8 +45,8 @@ defmodule Specx do
   @doc """
   Helper function that returns true when x is valid for spec.
   """
-  def valid?(spec, x) do 
-    Spec.conform(spec, x)
+  def valid?(spec, x) do
+    Specx.Spec.conform(spec, x)
     |> invalid?()
     |> Kernel.not()
   end

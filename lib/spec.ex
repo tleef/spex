@@ -25,15 +25,29 @@ defimpl Specx.Spec, for: Atom do
 end
 
 defimpl Specx.Spec, for: Tuple do
-  def conform({:map, key_spec, opts}, x) do
-    x
+  def conform({:map, key_specs, _opts}, x) do
+    if not is_map(x), do: throw(:invalid)
+  catch
+    :invalid -> :invalid
   end
 
-  def conform({:list, items_spec, opts}, x) do
-    x
+  def conform({:list, items_spec, _opts}, x) do
+    if not is_list(x), do: throw(:invalid)
+
+    Enum.map(x, fn item ->
+      Specx.conform(items_spec, item)
+      |> case do
+        :invalid -> throw(:invalid)
+        result -> result
+      end
+    end)
+  catch
+    :invalid -> :invalid
   end
 
-  def conform({:tuple, elem_specs, opts}, x) do
-    x
+  def conform({:tuple, elem_specs, _opts}, x) do
+    if not is_tuple(x), do: throw(:invalid)
+  catch
+    :invalid -> :invalid
   end
 end
